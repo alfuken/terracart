@@ -1,7 +1,7 @@
 [
 {
-  "modid": "wheecarts",
-  "name": "WheeCarts",
+  "modid": "terracart",
+  "name": "TerraCart",
   "description": "Don't stop me now! I'm having such a good time!",
   "version": "${version}",
   "mcversion": "${mcversion}",
