@@ -4,5 +4,4 @@ eclipse
 *.iml
 *.ipr
 *.iws
-*.txt
 gradle*
