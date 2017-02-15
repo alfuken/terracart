@@ -1,0 +1,16 @@
+[
+{
+  "modid": "wheecarts",
+  "name": "WheeCarts",
+  "description": "Don't stop me now! I'm having such a good time!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Lime"],
+  "credits": "Lime",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
