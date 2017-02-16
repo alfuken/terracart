@@ -1,31 +1,46 @@
 package com.lime.terracart;
 
-import com.lime.terracart.entities.EntityTerraCart;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import static net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class RailsClickHandler {
-    @SubscribeEvent(priority=EventPriority.NORMAL, receiveCanceled=true)
-    public void onEvent(PlayerInteractEvent event)
+    @SubscribeEvent(priority= EventPriority.HIGH, receiveCanceled=true)
+    public EnumActionResult onEvent(PlayerInteractEvent.RightClickBlock event)
     {
-        World vv = event.world;
-        if (
-            !vv.isRemote &&
-            event.action == RIGHT_CLICK_BLOCK &&
-            event.entity instanceof EntityPlayer
-        ) {
-            EntityTerraCart cart = new EntityTerraCart(
-                event.world,
-                (double)((float)event.x + 0.5F),
-                (double)((float)event.y + 0.5F),
-                (double)((float)event.z + 0.5F)
-            );
-            event.world.spawnEntityInWorld(cart);
-            event.entity.mountEntity(cart);
+        World worldIn = event.getEntityPlayer().getEntityWorld();
+        BlockPos pos = event.getPos();
+
+        IBlockState iblockstate = worldIn.getBlockState(pos);
+
+        if (!BlockRailBase.isRailBlock(iblockstate))
+        {
+            return EnumActionResult.FAIL;
+        }
+        else
+        {
+            if (!worldIn.isRemote)
+            {
+                BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = iblockstate.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)iblockstate.getValue(((BlockRailBase)iblockstate.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+                double d0 = 0.0D;
+
+                if (blockrailbase$enumraildirection.isAscending())
+                {
+                    d0 = 0.5D;
+                }
+
+                EntityTerraCart cart = new EntityTerraCart(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.0625D + d0, (double)pos.getZ() + 0.5D);
+
+                worldIn.spawnEntityInWorld(cart);
+                event.getEntityPlayer().startRiding(cart, true);
+            }
+
+            return EnumActionResult.SUCCESS;
         }
     }
 }

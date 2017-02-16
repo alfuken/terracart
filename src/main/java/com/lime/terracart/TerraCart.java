@@ -1,17 +1,14 @@
 package com.lime.terracart;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
 @Mod(modid = TerraCart.MODID, name = TerraCart.MODNAME, version = TerraCart.VERSION)
 public class TerraCart {
     public static final String MODID = "terracart";
     public static final String MODNAME = "TerraCart";
-    public static final String VERSION = "1.7.10-1";
-
-    @Mod.Instance
-    public static TerraCart instance = new TerraCart();
+    public static final String VERSION = "1.10.2-1";
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent e) {
