@@ -2,6 +2,7 @@ package com.lime.terracart;
 
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,7 +19,7 @@ public class RailsClickHandler {
 
         IBlockState iblockstate = worldIn.getBlockState(pos);
 
-        if (!BlockRailBase.isRailBlock(iblockstate) || event.getEntityPlayer().getHeldItemMainhand() != null)
+        if (!BlockRailBase.isRailBlock(iblockstate) || (event.getEntityPlayer().inventory.getCurrentItem() != ItemStack.EMPTY))
         {
             return EnumActionResult.FAIL;
         }
@@ -26,7 +27,7 @@ public class RailsClickHandler {
         {
             if (!worldIn.isRemote)
             {
-                BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = iblockstate.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)iblockstate.getValue(((BlockRailBase)iblockstate.getBlock()).getShapeProperty()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+                BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = iblockstate.getBlock() instanceof BlockRailBase ? ((BlockRailBase)iblockstate.getBlock()).getRailDirection(worldIn, pos, iblockstate, null) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
                 double d0 = 0.0D;
 
                 if (blockrailbase$enumraildirection.isAscending())
@@ -36,7 +37,7 @@ public class RailsClickHandler {
 
                 EntityTerraCart cart = new EntityTerraCart(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.0625D + d0, (double)pos.getZ() + 0.5D);
 
-                worldIn.spawnEntityInWorld(cart);
+                worldIn.spawnEntity(cart);
                 event.getEntityPlayer().startRiding(cart, true);
             }
 

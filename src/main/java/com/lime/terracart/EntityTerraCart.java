@@ -6,6 +6,7 @@ import net.minecraft.block.BlockRailPowered;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.*;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,12 +37,12 @@ import java.util.List;
 
 public class EntityTerraCart extends EntityMinecart
 {
-    private static final DataParameter<Integer> ROLLING_AMPLITUDE = EntityDataManager.createKey(net.minecraft.entity.item.EntityMinecart.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> ROLLING_DIRECTION = EntityDataManager.createKey(net.minecraft.entity.item.EntityMinecart.class, DataSerializers.VARINT);
-    private static final DataParameter<Float> DAMAGE = EntityDataManager.createKey(net.minecraft.entity.item.EntityMinecart.class, DataSerializers.FLOAT);
-    private static final DataParameter<Integer> DISPLAY_TILE = EntityDataManager.createKey(net.minecraft.entity.item.EntityMinecart.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> DISPLAY_TILE_OFFSET = EntityDataManager.createKey(net.minecraft.entity.item.EntityMinecart.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> SHOW_BLOCK = EntityDataManager.createKey(net.minecraft.entity.item.EntityMinecart.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> ROLLING_AMPLITUDE = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> ROLLING_DIRECTION = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Float> DAMAGE = EntityDataManager.<Float>createKey(EntityMinecart.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> DISPLAY_TILE = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> DISPLAY_TILE_OFFSET = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> SHOW_BLOCK = EntityDataManager.<Boolean>createKey(EntityMinecart.class, DataSerializers.BOOLEAN);
     private boolean isInReverse;
     /** Minecart rotational logic matrix */
     private static final int[][][] MATRIX = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
@@ -96,7 +97,7 @@ public class EntityTerraCart extends EntityMinecart
         this.dataManager.register(DAMAGE, 0.0F);
         this.dataManager.register(DISPLAY_TILE, 0);
         this.dataManager.register(DISPLAY_TILE_OFFSET, 6);
-        this.dataManager.register(SHOW_BLOCK, false);
+        this.dataManager.register(SHOW_BLOCK, Boolean.FALSE);
     }
 
     /**
@@ -153,7 +154,7 @@ public class EntityTerraCart extends EntityMinecart
      */
     public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        if (!this.worldObj.isRemote && !this.isDead)
+        if (!this.world.isRemote && !this.isDead)
         {
             if (this.isEntityInvulnerable(source))
             {
@@ -215,14 +216,6 @@ public class EntityTerraCart extends EntityMinecart
     }
 
     /**
-     * Will get destroyed next tick.
-     */
-    public void setDead()
-    {
-        super.setDead();
-    }
-
-    /**
      * Gets the horizontal facing direction of this Entity, adjusted to take specially-treated entity types into
      * account.
      */
@@ -255,15 +248,14 @@ public class EntityTerraCart extends EntityMinecart
             this.kill();
         }
 
-        if (!this.worldObj.isRemote && this.worldObj instanceof WorldServer)
+        if (!this.world.isRemote && this.world instanceof WorldServer)
         {
-            this.worldObj.theProfiler.startSection("portal");
-            MinecraftServer minecraftserver = this.worldObj.getMinecraftServer();
+            this.world.theProfiler.startSection("portal");
+            MinecraftServer minecraftserver = this.world.getMinecraftServer();
             int i = this.getMaxInPortalTime();
 
             if (this.inPortal)
             {
-                assert minecraftserver != null;
                 if (minecraftserver.getAllowNether())
                 {
                     if (!this.isRiding() && this.portalCounter++ >= i)
@@ -272,7 +264,7 @@ public class EntityTerraCart extends EntityMinecart
                         this.timeUntilPortal = this.getPortalCooldown();
                         int j;
 
-                        if (this.worldObj.provider.getDimensionType().getId() == -1)
+                        if (this.world.provider.getDimensionType().getId() == -1)
                         {
                             j = 0;
                         }
@@ -305,10 +297,10 @@ public class EntityTerraCart extends EntityMinecart
                 --this.timeUntilPortal;
             }
 
-            this.worldObj.theProfiler.endSection();
+            this.world.theProfiler.endSection();
         }
 
-        if (this.worldObj.isRemote)
+        if (this.world.isRemote)
         {
             if (this.turnProgress > 0)
             {
@@ -339,17 +331,17 @@ public class EntityTerraCart extends EntityMinecart
                 this.motionY -= 0.03999999910593033D;
             }
 
-            int xint = MathHelper.floor_double(this.posX);
-            int yint = MathHelper.floor_double(this.posY);
-            int zint = MathHelper.floor_double(this.posZ);
+            int xint = MathHelper.floor(this.posX);
+            int yint = MathHelper.floor(this.posY);
+            int zint = MathHelper.floor(this.posZ);
 
-            if (BlockRailBase.isRailBlock(this.worldObj, new BlockPos(xint, yint - 1, zint)))
+            if (BlockRailBase.isRailBlock(this.world, new BlockPos(xint, yint - 1, zint)))
             {
                 --yint;
             }
 
             BlockPos blockpos = new BlockPos(xint, yint, zint);
-            IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+            IBlockState iblockstate = this.world.getBlockState(blockpos);
 
             if (canUseRail() && BlockRailBase.isRailBlock(iblockstate))
             {
@@ -396,7 +388,7 @@ public class EntityTerraCart extends EntityMinecart
 
             if (canBeRidden() && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D)
             {
-                List<Entity> list = this.worldObj.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
+                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
 
                 if (!list.isEmpty())
                 {
@@ -412,7 +404,7 @@ public class EntityTerraCart extends EntityMinecart
             }
             else
             {
-                for (Entity entity : this.worldObj.getEntitiesWithinAABBExcludingEntity(this, box))
+                for (Entity entity : this.world.getEntitiesWithinAABBExcludingEntity(this, box))
                 {
                     if (!this.isPassenger(entity) && entity.canBePushed() && entity instanceof net.minecraft.entity.item.EntityMinecart)
                     {
@@ -447,8 +439,8 @@ public class EntityTerraCart extends EntityMinecart
     protected void moveDerailedMinecart()
     {
         double d0 = onGround ? this.getMaximumSpeed() : getMaxSpeedAirLateral();
-        this.motionX = MathHelper.clamp_double(this.motionX, -d0, d0);
-        this.motionZ = MathHelper.clamp_double(this.motionZ, -d0, d0);
+        this.motionX = MathHelper.clamp(this.motionX, -d0, d0);
+        this.motionZ = MathHelper.clamp(this.motionZ, -d0, d0);
 
         double moveY = motionY;
         if(getMaxSpeedAirVertical() > 0 && motionY > getMaxSpeedAirVertical())
@@ -468,7 +460,7 @@ public class EntityTerraCart extends EntityMinecart
             this.motionZ *= 0.5D;
         }
 
-        this.moveEntity(this.motionX, moveY, this.motionZ);
+        this.move(MoverType.SELF, this.motionX, moveY, this.motionZ);
 
         if (!this.onGround)
         {
@@ -499,7 +491,7 @@ public class EntityTerraCart extends EntityMinecart
         }
 
         double slopeAdjustment = getSlopeAdjustment();
-        BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = blockrailbase.getRailDirection(worldObj, pos, state, this);
+        BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = blockrailbase.getRailDirection(world, pos, state, this);
 
         switch (blockrailbase$enumraildirection)
         {
@@ -610,11 +602,11 @@ public class EntityTerraCart extends EntityMinecart
         this.setPosition(this.posX, this.posY, this.posZ);
         this.moveMinecartOnRail(pos);
 
-        if (aint[0][1] != 0 && MathHelper.floor_double(this.posX) - pos.getX() == aint[0][0] && MathHelper.floor_double(this.posZ) - pos.getZ() == aint[0][2])
+        if (aint[0][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[0][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[0][2])
         {
             this.setPosition(this.posX, this.posY + (double)aint[0][1], this.posZ);
         }
-        else if (aint[1][1] != 0 && MathHelper.floor_double(this.posX) - pos.getX() == aint[1][0] && MathHelper.floor_double(this.posZ) - pos.getZ() == aint[1][2])
+        else if (aint[1][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[1][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[1][2])
         {
             this.setPosition(this.posX, this.posY + (double)aint[1][1], this.posZ);
         }
@@ -636,8 +628,8 @@ public class EntityTerraCart extends EntityMinecart
             this.setPosition(this.posX, vec3d1.yCoord, this.posZ);
         }
 
-        int j = MathHelper.floor_double(this.posX);
-        int i = MathHelper.floor_double(this.posZ);
+        int j = MathHelper.floor(this.posX);
+        int i = MathHelper.floor(this.posZ);
 
         if (j != pos.getX() || i != pos.getZ())
         {
@@ -649,7 +641,7 @@ public class EntityTerraCart extends EntityMinecart
 
         if(shouldDoRailFunctions())
         {
-            ((BlockRailBase)state.getBlock()).onMinecartPass(worldObj, this, pos);
+            ((BlockRailBase)state.getBlock()).onMinecartPass(world, this, pos);
         }
 
         if (boosted && shouldDoRailFunctions())
@@ -664,22 +656,22 @@ public class EntityTerraCart extends EntityMinecart
             }
             else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.EAST_WEST)
             {
-                if (this.worldObj.getBlockState(pos.west()).isNormalCube())
+                if (this.world.getBlockState(pos.west()).isNormalCube())
                 {
                     this.motionX = 0.02D;
                 }
-                else if (this.worldObj.getBlockState(pos.east()).isNormalCube())
+                else if (this.world.getBlockState(pos.east()).isNormalCube())
                 {
                     this.motionX = -0.02D;
                 }
             }
             else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.NORTH_SOUTH)
             {
-                if (this.worldObj.getBlockState(pos.north()).isNormalCube())
+                if (this.world.getBlockState(pos.north()).isNormalCube())
                 {
                     this.motionZ = 0.02D;
                 }
-                else if (this.worldObj.getBlockState(pos.south()).isNormalCube())
+                else if (this.world.getBlockState(pos.south()).isNormalCube())
                 {
                     this.motionZ = -0.02D;
                 }
@@ -716,19 +708,20 @@ public class EntityTerraCart extends EntityMinecart
         this.setEntityBoundingBox(new AxisAlignedBB(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f));
     }
 
+    @Nullable
     @SideOnly(Side.CLIENT)
     public Vec3d getPosOffset(double x, double y, double z, double offset)
     {
-        int i = MathHelper.floor_double(x);
-        int j = MathHelper.floor_double(y);
-        int k = MathHelper.floor_double(z);
+        int i = MathHelper.floor(x);
+        int j = MathHelper.floor(y);
+        int k = MathHelper.floor(z);
 
-        if (BlockRailBase.isRailBlock(this.worldObj, new BlockPos(i, j - 1, k)))
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(i, j - 1, k)))
         {
             --j;
         }
 
-        IBlockState iblockstate = this.worldObj.getBlockState(new BlockPos(i, j, k));
+        IBlockState iblockstate = this.world.getBlockState(new BlockPos(i, j, k));
 
         if (BlockRailBase.isRailBlock(iblockstate))
         {
@@ -749,11 +742,11 @@ public class EntityTerraCart extends EntityMinecart
             x = x + d0 * offset;
             z = z + d1 * offset;
 
-            if (aint[0][1] != 0 && MathHelper.floor_double(x) - i == aint[0][0] && MathHelper.floor_double(z) - k == aint[0][2])
+            if (aint[0][1] != 0 && MathHelper.floor(x) - i == aint[0][0] && MathHelper.floor(z) - k == aint[0][2])
             {
                 y += (double)aint[0][1];
             }
-            else if (aint[1][1] != 0 && MathHelper.floor_double(x) - i == aint[1][0] && MathHelper.floor_double(z) - k == aint[1][2])
+            else if (aint[1][1] != 0 && MathHelper.floor(x) - i == aint[1][0] && MathHelper.floor(z) - k == aint[1][2])
             {
                 y += (double)aint[1][1];
             }
@@ -766,18 +759,19 @@ public class EntityTerraCart extends EntityMinecart
         }
     }
 
+    @Nullable
     public Vec3d getPos(double x, double y, double z)
     {
-        int i = MathHelper.floor_double(x);
-        int j = MathHelper.floor_double(y);
-        int k = MathHelper.floor_double(z);
+        int i = MathHelper.floor(x);
+        int j = MathHelper.floor(y);
+        int k = MathHelper.floor(z);
 
-        if (BlockRailBase.isRailBlock(this.worldObj, new BlockPos(i, j - 1, k)))
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(i, j - 1, k)))
         {
             --j;
         }
 
-        IBlockState iblockstate = this.worldObj.getBlockState(new BlockPos(i, j, k));
+        IBlockState iblockstate = this.world.getBlockState(new BlockPos(i, j, k));
 
         if (BlockRailBase.isRailBlock(iblockstate))
         {
@@ -880,7 +874,7 @@ public class EntityTerraCart extends EntityMinecart
         {
             compound.setBoolean("CustomDisplayTile", true);
             IBlockState iblockstate = this.getDisplayTile();
-            ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(iblockstate.getBlock());
+            ResourceLocation resourcelocation = (ResourceLocation)Block.REGISTRY.getNameForObject(iblockstate.getBlock());
             compound.setString("DisplayTile", resourcelocation.toString());
             compound.setInteger("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
             compound.setInteger("DisplayOffset", this.getDisplayTileOffset());
@@ -898,7 +892,7 @@ public class EntityTerraCart extends EntityMinecart
             getCollisionHandler().onEntityCollision(this, entityIn);
             return;
         }
-        if (!this.worldObj.isRemote)
+        if (!this.world.isRemote)
         {
             if (!entityIn.noClip && !this.noClip)
             {
@@ -910,7 +904,7 @@ public class EntityTerraCart extends EntityMinecart
 
                     if (d2 >= 9.999999747378752E-5D)
                     {
-                        d2 = (double)MathHelper.sqrt_double(d2);
+                        d2 = (double)MathHelper.sqrt(d2);
                         d0 = d0 / d2;
                         d1 = d1 / d2;
                         double d3 = 1.0D / d2;
@@ -1115,11 +1109,11 @@ public class EntityTerraCart extends EntityMinecart
     /* =================================== FORGE START ===========================================*/
     private BlockPos getCurrentRailPosition()
     {
-        int x = MathHelper.floor_double(this.posX);
-        int y = MathHelper.floor_double(this.posY);
-        int z = MathHelper.floor_double(this.posZ);
+        int x = MathHelper.floor(this.posX);
+        int y = MathHelper.floor(this.posY);
+        int z = MathHelper.floor(this.posZ);
 
-        if (BlockRailBase.isRailBlock(this.worldObj, new BlockPos(x, y - 1, z))) y--;
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(x, y - 1, z))) y--;
         return new BlockPos(x, y, z);
     }
 
@@ -1127,10 +1121,10 @@ public class EntityTerraCart extends EntityMinecart
     {
         if (!canUseRail()) return getMaximumSpeed();
         BlockPos pos = this.getCurrentRailPosition();
-        IBlockState state = this.worldObj.getBlockState(pos);
+        IBlockState state = this.world.getBlockState(pos);
         if (!BlockRailBase.isRailBlock(state)) return getMaximumSpeed();
 
-        float railMaxSpeed = ((BlockRailBase)state.getBlock()).getRailMaxSpeed(worldObj, this, pos);
+        float railMaxSpeed = ((BlockRailBase)state.getBlock()).getRailMaxSpeed(world, this, pos);
         return Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
     }
 
@@ -1150,9 +1144,9 @@ public class EntityTerraCart extends EntityMinecart
         }
 
         double max = this.getMaxSpeed();
-        mX = MathHelper.clamp_double(mX, -max, max);
-        mZ = MathHelper.clamp_double(mZ, -max, max);
-        this.moveEntity(mX, 0.0D, mZ);
+        mX = MathHelper.clamp(mX, -max, max);
+        mZ = MathHelper.clamp(mZ, -max, max);
+        this.move(MoverType.SELF, mX, 0.0D, mZ);
     }
 
     /**
