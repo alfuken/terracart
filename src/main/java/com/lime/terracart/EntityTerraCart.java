@@ -431,6 +431,21 @@ public class EntityTerraCart extends EntityMinecart
      */
     public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
     {
+        if (receivingPower)
+        {
+            if (this.isBeingRidden())
+            {
+                this.removePassengers();
+            }
+
+            if (this.getRollingAmplitude() == 0)
+            {
+                this.setRollingDirection(-this.getRollingDirection());
+                this.setRollingAmplitude(10);
+                this.setDamage(50.0F);
+                this.setBeenAttacked();
+            }
+        }
     }
 
     /**
