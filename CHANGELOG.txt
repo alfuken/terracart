@@ -1,0 +1,4 @@
+2. Added check for empty hand when trying to "use" rails.
+   Prevents mounting when you have another item in hand.
+
+1. Initial release
