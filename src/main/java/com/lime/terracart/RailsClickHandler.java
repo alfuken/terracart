@@ -18,7 +18,7 @@ public class RailsClickHandler {
 
         IBlockState iblockstate = worldIn.getBlockState(pos);
 
-        if (!BlockRailBase.isRailBlock(iblockstate))
+        if (!BlockRailBase.isRailBlock(iblockstate) || event.getEntityPlayer().getHeldItemMainhand() != null)
         {
             return EnumActionResult.FAIL;
         }
