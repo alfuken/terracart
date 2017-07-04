@@ -2,6 +2,9 @@ package com.lime.terracart;
 
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.EntityMinecartEmpty;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -14,12 +17,12 @@ public class RailsClickHandler {
     @SubscribeEvent(priority= EventPriority.HIGH, receiveCanceled=true)
     public EnumActionResult onEvent(PlayerInteractEvent.RightClickBlock event)
     {
-        World worldIn = event.getEntityPlayer().getEntityWorld();
+        World worldIn = event.getEntity().world;
         BlockPos pos = event.getPos();
 
         IBlockState iblockstate = worldIn.getBlockState(pos);
 
-        if (!BlockRailBase.isRailBlock(iblockstate) || (event.getEntityPlayer().inventory.getCurrentItem() != ItemStack.EMPTY))
+        if (!BlockRailBase.isRailBlock(iblockstate) || !(event.getEntity() instanceof EntityPlayer) || (event.getEntityPlayer().inventory.getCurrentItem() != ItemStack.EMPTY))
         {
             return EnumActionResult.FAIL;
         }
@@ -35,7 +38,12 @@ public class RailsClickHandler {
                     d0 = 0.5D;
                 }
 
-                EntityTerraCart cart = new EntityTerraCart(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.0625D + d0, (double)pos.getZ() + 0.5D);
+                EntityMinecart cart;
+                if (Config.use_vanilla_cart){
+                    cart = new EntityMinecartEmpty(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.0625D + d0, (double)pos.getZ() + 0.5D);
+                } else {
+                    cart = new EntityTerraCart(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.0625D + d0, (double)pos.getZ() + 0.5D);
+                }
 
                 worldIn.spawnEntity(cart);
                 event.getEntityPlayer().startRiding(cart, true);

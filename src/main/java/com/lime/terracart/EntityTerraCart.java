@@ -229,7 +229,7 @@ public class EntityTerraCart extends EntityMinecart
      */
     public void onUpdate()
     {
-        if (!this.isBeingRidden() && this.motionX < 0.0001D && this.motionY < 0.0001D && this.motionZ < 0.0001D) {
+        if (!this.isBeingRidden() && Math.abs(this.motionX) < 0.0001D && Math.abs(this.motionY) < 0.02D && Math.abs(this.motionZ) < 0.0001D) {
             this.kill();
         }
 
@@ -473,6 +473,11 @@ public class EntityTerraCart extends EntityMinecart
             this.motionX *= 0.5D;
             this.motionY *= 0.5D;
             this.motionZ *= 0.5D;
+
+            if (Math.abs(this.motionX) < 0.02D && Math.abs(this.motionY) < 0.02D && Math.abs(this.motionZ) < 0.02D) {
+                this.kill();
+            }
+
         }
 
         this.move(MoverType.SELF, this.motionX, moveY, this.motionZ);
