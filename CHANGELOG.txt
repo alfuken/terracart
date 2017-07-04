@@ -1,5 +1,13 @@
-2.1 * Now passenger is properly ejected when riding over powered activator rail
+3.
++ Added config option to spawn vanilla cart instead of terracart when right-clicking rails
++ Passenger is now automatically dismounted when cart is stopped AND derailed (not on tracks anymore)
++ Cart now despawns after passenger dismounts it
 
-2. + Added check for empty hand when trying to "use" rails. Prevents mounting when you have another item in hand.
+2.1
+* Now passenger is properly ejected when riding over powered activator rail
 
-1. Initial release
+2.
++ Added check for empty hand when trying to "use" rails. Prevents mounting when you have another item in hand
+
+1.
+Initial release
